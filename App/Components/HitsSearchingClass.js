@@ -21,7 +21,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux'
 import { ActionCreators } from '../Actions'
 
-class ListItem extends React.Component {
+class ListItem extends React.PureComponent {
   constructor(props){
     super(props)
     this.swipeable = null;
@@ -130,21 +130,20 @@ class HitsSearching extends React.PureComponent{
     }
   }
 
+  onOpen = (event, gestureState, swipeable) => {
+      if (this.state.currentlyOpenSwipeable && this.state.currentlyOpenSwipeable !== swipeable) {
+          this.state.currentlyOpenSwipeable.recenter();
+      }
+
+      this.setState({currentlyOpenSwipeable: swipeable});
+  }
+  onClose = () => this.setState({currentlyOpenSwipeable: null})
+
   render(){
     //console.log('HitsSearchingClass - this.props', this.props)
     //console.log('HitsSearchingClass - this.props.hits', this.props.hits)
     console.log('HitsSearchingClass Render')
     const {currentlyOpenSwipeable} = this.state;
-    const itemProps = {
-        onOpen: (event, gestureState, swipeable) => {
-            if (this.state.currentlyOpenSwipeable && this.state.currentlyOpenSwipeable !== swipeable) {
-                this.state.currentlyOpenSwipeable.recenter();
-            }
-
-            this.setState({currentlyOpenSwipeable: swipeable});
-        },
-        onClose: () => this.setState({currentlyOpenSwipeable: null})
-    };
     const onEndReached = () => {
       console.log('HitsSearchingClass - onEndReached triggered')
       if (this.props.hasMore) {
@@ -166,7 +165,8 @@ class HitsSearching extends React.PureComponent{
           scrollEnabled={!this.state.isSwiping}
           renderItem={({ item }) => (
             <ListItem
-              {...itemProps}
+              onOpen={this.onOpen()}
+              onClose={this.onClose()}
               onPressHit={this.props.onPressHit}
               onPressCompanyName={this.props.onPressCompanyName}
               fieldOne={this.props.fieldOne}
